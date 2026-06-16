@@ -71,11 +71,6 @@ flowchart TB
 
 ## Quick Start
 
-### Prerequisites
-
-- Docker Desktop
-- Python 3.12+
-
 ### Run the full stack
 
 ```bash
@@ -95,7 +90,7 @@ Services:
 
 Open **http://localhost:8000/docs** for interactive API documentation.
 
-### Local development (without Docker for the API)
+### For local development (without Docker for the API)
 
 ```bash
 python -m venv .venv
@@ -114,14 +109,6 @@ pytest -v
 ```
 
 Integration tests require Postgres (`docker compose up -d postgres`).
-
-### Seed sample events
-
-```bash
-make seed
-# or
-python scripts/seed_events.py --base-url http://localhost:8000
-```
 
 ## API Examples
 
@@ -250,33 +237,12 @@ app/
 | `make seed` | POST sample events to the API |
 | `make logs` | Tail api/worker logs |
 
-## Trade-offs
-
-1. **Kafka tiered topics vs Redis priority queue (ZSET):** Topics provide durability, replay, and horizontal consumer scaling. A Redis heap is simpler but volatile and harder to scale across workers.
-
-2. **At-least-once delivery:** Kafka consumers and retries may deliver the same notification more than once. Providers should dedupe using `provider_ref` or client-side keys.
-
-3. **Outbox pattern (lite):** We insert to Postgres then publish to Kafka. A crash between those steps creates a small window where a notification exists but is not yet queued. Production would use a transactional outbox table polled by a separate publisher.
-
-4. **Mock providers:** Configurable failure rates enable deterministic partial-failure demos. Real providers need rate limits, webhooks, and credential management.
-
-5. **50k/min locally:** A single Redpanda node will not mirror production. Scale horizontally with more topic partitions (12 configured), multiple worker replicas, and API instances behind a load balancer.
-
-6. **Partial failure UX:** Parent status `PartiallySent` with independent per-channel retries gives better UX than all-or-nothing delivery when one channel is down.
-
 ## Scaling Notes (50k/min)
 
 ```
 50,000 req/min ÷ 60 ≈ 833 events/sec sustained
 Peak (2×)     ≈ 1,700 events/sec
 ```
-
-Production knobs:
-
-- **API:** 4+ Uvicorn workers behind a reverse proxy
-- **Kafka:** 12 partitions per priority topic
-- **Workers:** 3–6 dispatcher instances per consumer group
-- **DB:** connection pool size 20, indexes on `idempotency_key` and `status`
 
 ## Environment Variables
 
