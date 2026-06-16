@@ -2,13 +2,6 @@
 
 Ordered commands to run the full stack on **Windows (PowerShell)**.
 
-## Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (running)
-- Python 3.12+ (optional — for local dev/tests only)
-
----
-
 ## 1. Clone and enter the project
 
 ```powershell
@@ -95,8 +88,6 @@ Open in browser:
 
 - Health: http://localhost:8000/health
 - Swagger UI: http://localhost:8000/docs
-
-> On PowerShell, `curl` is an alias for `Invoke-WebRequest`. Use **`curl.exe`** to avoid prompts.
 
 ---
 
@@ -215,18 +206,6 @@ In separate terminals:
 
 ---
 
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `No 'script_location' key found` in container | Rebuild image — Dockerfile must include `alembic.ini` and `alembic/` |
-| `ConnectionRefusedError` running alembic locally | Use Postgres port **5433** in `.env`, not 5432 |
-| PowerShell `curl` security prompt | Use `curl.exe` instead of `curl` |
-| `JSON decode error` or `bad range specification` on POST | Use `curl.exe --%` (see step 6) or `Invoke-RestMethod` |
-| `init-kafka` failed | Ensure `scripts/` is copied in Dockerfile; re-run `docker compose up -d --build` |
-| API returns 500 on POST | Run migrations (step 4) |
-
----
 
 ## Quick reference
 
