@@ -179,27 +179,6 @@ The dispatcher worker polls topics in strict priority order: critical â†’ high â
 3. **PostgreSQL strong guarantee:** unique index on `idempotency_key` with `ON CONFLICT DO NOTHING`.
 4. Kafka publish happens **only after** the DB row is created.
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API as FastAPI
-    participant Redis
-    participant DB as PostgreSQL
-    participant Kafka
-
-    Client->>API: POST /v1/notifications
-    API->>Redis: SET NX idempotency:key
-    alt Duplicate in Redis
-        Redis-->>API: key exists
-        API->>DB: SELECT by idempotency_key
-        API-->>Client: 200 existing notification
-    else New request
-        API->>DB: INSERT notification Pending
-        API->>Kafka: publish to priority topic
-        API-->>Client: 202 Accepted
-    end
-```
-
 ## Retry & Failure Handling
 
 | Mechanism | Behavior |
